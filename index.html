@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Food Love</title>
+  <!-- Motor de Física Matter.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <!-- Google Fonts (Fredoka & Sniglet - Estilo Kawaii / Caricatura) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800;900&family=Sniglet:wght@400;800&display=swap" rel="stylesheet">
+  <!-- Estilos CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Contenedor Principal del Juego -->
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+  </div>
+
+  <!-- Overlay para aviso de girar teléfono en móviles (Modo Portrait) -->
+  <div id="rotateDeviceOverlay">
+    <div class="rotate-card">
+      <div class="phone-icon-wrapper">
+        <svg class="phone-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="30" y="18" width="40" height="64" rx="7" stroke="currentColor" stroke-width="5" fill="rgba(255, 255, 255, 0.15)"/>
+          <circle cx="50" cy="74" r="3" fill="currentColor"/>
+          <path d="M72 38 C 84 38, 84 62, 72 62" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <polygon points="70,57 76,62 70,67" fill="currentColor"/>
+        </svg>
+      </div>
+      <h2>¡Gira tu pantalla!</h2>
+      <p>Para disfrutar del juego con la mejor experiencia, por favor coloca tu dispositivo en posición horizontal.</p>
+    </div>
+  </div>
+
+  <!-- Lógica JavaScript del Juego -->
+  <script src="game.js"></script>
+</body>
+</html>
