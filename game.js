@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 //  SUIKA GAME â€” EDICIÓN PAREJA & COMIDA
 //  Motor: Matter.js + Canvas API (100% Full-Screen â€” Proporciones Suika)
 // ============================================================
@@ -36,7 +36,7 @@ const GO_LINE_Y = Math.round(BOX_Y + BOX_H * 0.14); // 279
 const CHAR_W = 165, CHAR_H = 180;
 const CHAR_Y = Math.round(shelfY + 5 - CHAR_H / 2); // 100 (El personaje queda 100% visible debajo del borde superior)
 const WALL_T = 24;
-const MAX_LEVEL = 9;
+const MAX_LEVEL = 11;
 
 // --- Paneles laterales fijos en el espacio virtual ---
 const leftSpace = BOX_X; // 570
@@ -65,33 +65,33 @@ const WHEEL_R_OUTER = 130;
 const WHEEL_R_INNER = 50;
 
 
-// Nombres y colores de cada nivel de comida
+// Nombres y colores de cada nivel de comida (11 niveles)
 const FOOD_NAMES = [
-  'Chocolate Blanco', 'Panqueque', 'Papas Fritas', 'Taco',
-  'Pollo', 'Pupusa', 'Pizza', 'Helado', 'CorazÃ³n'
+  'Chocolate Blanco', 'Oreo', 'Panqueque', 'Papas Fritas', 'Taco',
+  'Pollo', 'Pupusa', 'Pizza', 'Helado', 'Banana Split', 'Corazón'
 ];
 const FOOD_COLORS = [
-  '#FFF5E6', '#D4A057', '#FFD700', '#CD853F',
-  '#FFB347', '#A8D86B', '#FF6347', '#FF85B3', '#FF1493'
+  '#FFF5E6', '#3B2F2F', '#D4A057', '#FFD700', '#CD853F',
+  '#FFB347', '#A8D86B', '#FF6347', '#FF85B3', '#FFE4B5', '#FF1493'
 ];
 
-// Radio de colisiÃ³n de cada nivel (Aumentado sutilmente para ajustar la dificultad)
-const FOOD_SIZES = [18, 25, 33, 42, 52, 63, 76, 92, 108];
+// Radio de colisión de cada nivel (Reducido para acomodar 11 niveles)
+const FOOD_SIZES = [15, 19, 24, 30, 36, 43, 51, 60, 70, 82, 95];
 
 
-// Factor de escala visual para compensar mÃ¡rgenes transparentes del PNG y asegurar que las comidas se toquen visualmente
-const FOOD_IMG_SCALE = [1.32, 1.28, 1.26, 1.26, 1.30, 1.25, 1.22, 1.25, 1.25];
+// Factor de escala visual para compensar márgenes transparentes del PNG y asegurar que las comidas se toquen visualmente
+const FOOD_IMG_SCALE = [1.32, 1.30, 1.28, 1.26, 1.26, 1.30, 1.25, 1.22, 1.25, 1.28, 1.25];
 
 const FOOD_STROKES = [
-  '#E8D5B0', '#B8862D', '#DAA520', '#8B5E3C',
-  '#E8942B', '#7CB342', '#E53935', '#E75480', '#C51162'
+  '#E8D5B0', '#1A1010', '#B8862D', '#DAA520', '#8B5E3C',
+  '#E8942B', '#7CB342', '#E53935', '#E75480', '#D4A76A', '#C51162'
 ];
 
-// Pesos de apariciÃ³n aleatoria en la mano: solo niveles 1 a 5 (Chocolate Blanco -> Pollo).
-// Pupusa, Pizza, Helado y CorazÃ³n solo se obtienen mediante fusiÃ³n.
-const SPAWN_WEIGHTS = [35, 28, 20, 12, 5, 0, 0, 0, 0];
+// Pesos de aparición aleatoria en la mano: solo niveles 1 a 5 (Chocolate Blanco -> Taco).
+// Pollo, Pupusa, Pizza, Helado, Banana Split y Corazón solo se obtienen mediante fusión.
+const SPAWN_WEIGHTS = [35, 28, 20, 12, 5, 0, 0, 0, 0, 0, 0];
 
-const SCORE_TABLE = [0, 0, 80, 180, 320, 500, 720, 980, 1280, 1620, 2500];
+const SCORE_TABLE = [0, 0, 60, 140, 240, 360, 500, 660, 840, 1040, 1300, 1620, 2500];
 const PARTICLE_COLORS = ['#FF6B9D', '#FFB6C1', '#FF4D6D', '#FFD700', '#FFF', '#FF85A2', '#C71585'];
 
 const HAND_OFFSET_X = -48;
@@ -236,10 +236,11 @@ function playGameOverSound() {
 }
 
 // ============================================================
-//  CARGA DE IMÃGENES
+//  CARGA DE IMÁGENES
 // ============================================================
 const ASSET_FOOD_SOURCES = [
   'Assets/Chocolate.png',
+  'Assets/oreo.png',
   'Assets/panqueque.png',
   'Assets/papas fritas.png',
   'Assets/tacos.png',
@@ -247,6 +248,7 @@ const ASSET_FOOD_SOURCES = [
   'Assets/pupusa.png',
   'Assets/pizza.png',
   'Assets/helado.png',
+  'Assets/banana split.png',
   'Assets/corazon.png'
 ];
 
@@ -334,7 +336,7 @@ let showLoveLetterModal = false;
 let loveLetterShown = false;
 let loveLetterCloseBtnBounds = { x: 0, y: 0, w: 38, h: 38 };
 
-// LÃMITES INTERACTIVOS DE BOTONES (Espacio Virtual 1600x900)
+// LÍMITES INTERACTIVOS DE BOTONES (Espacio Virtual 1600x900)
 const menuBtnBounds = {
   gameStart: { x: VIRTUAL_W / 2 - 170, y: 460, w: 340, h: 72 },
   myScore: { x: VIRTUAL_W / 2 - 170, y: 555, w: 340, h: 66 }
@@ -349,7 +351,7 @@ const scoreModalCloseBtn = { x: VIRTUAL_W / 2 - 100, y: VIRTUAL_H / 2 + 125, w: 
 
 
 // ============================================================
-//  FOOD ITEM â€” CUERPOS FÃSICOS
+//  FOOD ITEM — CUERPOS FÍSICOS
 // ============================================================
 function createFoodBody(x, y, level) {
   const radius = FOOD_SIZES[level - 1];
@@ -415,7 +417,7 @@ function getHandPos(levelIndex = currentLevel) {
 }
 
 // ============================================================
-//  SOLTAR ÃTEM
+//  SOLTAR ÍTEM
 // ============================================================
 function dropItem() {
   if (gameState !== 'playing') return;
@@ -426,14 +428,14 @@ function dropItem() {
   const { handX, handY } = getHandPos(levelToDrop);
   const dropY = handY + radius * 0.3; // Nace exactamente desde la mano del personaje
 
-  // La mano suelta el objeto y se queda vacÃ­a durante la caÃ­da
+  // La mano suelta el objeto y se queda vacía durante la caída
   currentLevel = 0;
   dropCooldown = 22;
 
   addFoodToWorld(handX, dropY, levelToDrop);
   playDropSound();
 
-  // El siguiente Ã­tem aparece en la mano tras una breve pausa realista (200ms)
+  // El siguiente ítem aparece en la mano tras una breve pausa realista (200ms)
   setTimeout(() => {
     if (gameState === 'playing' && currentLevel === 0) {
       generateNextPair();
@@ -453,7 +455,7 @@ function tryRegisterFusion(a, b) {
   if (a._fused || b._fused) return;
 
   const now = Date.now();
-  // BrevÃ­sima protecciÃ³n de 30ms para evitar fusiones en cascada en el mismo frame instantÃ¡neo
+  // Brevísima protección de 30ms para evitar fusiones en cascada en el mismo frame instantáneo
   if ((a.spawnTime && now - a.spawnTime < 30) || (b.spawnTime && now - b.spawnTime < 30)) {
     return;
   }
@@ -478,7 +480,7 @@ Events.on(engine, 'collisionActive', (event) => {
 function processFusions() {
   if (gameState === 'gameover' || gameState === 'celebration') return;
 
-  // 1) Escanear pares de colisiÃ³n activos directamente en el motor de Matter.js
+  // 1) Escanear pares de colisión activos directamente en el motor de Matter.js
   if (engine.pairs && engine.pairs.list) {
     for (const pair of engine.pairs.list) {
       if (pair.isActive) {
@@ -526,13 +528,13 @@ function processFusions() {
     removeFoodFromWorld(a);
     removeFoodFromWorld(b);
 
-    const newLevel = level + 1; // FusiÃ³n exacta: Nivel N + Nivel N = Nivel N+1
+    const newLevel = level + 1; // Fusión exacta: Nivel N + Nivel N = Nivel N+1
     addFoodToWorld(mx, my, newLevel);
 
     const pts = SCORE_TABLE[newLevel] || 0;
     score += pts;
 
-    // Al llegar al Nivel 9 (CorazÃ³n) uniendo 2 Helados (Nivel 8)
+    // Al llegar al Nivel 11 (Corazón) uniendo 2 Banana Splits (Nivel 10)
     if (newLevel === MAX_LEVEL) {
       playHeartSound();
       heartAchieved = true;
@@ -632,17 +634,31 @@ function checkGameOver() {
   if (gameState !== 'playing') return;
   const now = Date.now();
   let isOverflowing = false;
+  let aboveLineCount = 0;
+
   for (const body of foodBodies) {
-    if (now - body.spawnTime < 2500) continue;
     const radius = FOOD_SIZES[body.foodLevel - 1];
     const topY = body.position.y - radius;
-    if (topY < GO_LINE_Y && Math.abs(body.velocity.y) < 0.3) {
-      isOverflowing = true;
-      break;
+
+    if (topY < GO_LINE_Y) {
+      aboveLineCount++;
+
+      // Detección principal: items asentados con protección de spawn reducida
+      if (now - body.spawnTime >= 1200 && Math.abs(body.velocity.y) < 1.2) {
+        isOverflowing = true;
+      }
     }
   }
 
+  // Detección secundaria: si hay 3+ items sobre la línea (anti-spam)
+  if (aboveLineCount >= 3) {
+    isOverflowing = true;
+  }
+
   if (isOverflowing) {
+    // Bloquear drops inmediatamente al detectar overflow
+    overflowLocked = true;
+
     if (!overflowStartTime) {
       overflowStartTime = now;
     } else if (now - overflowStartTime > 2000) {
@@ -650,6 +666,8 @@ function checkGameOver() {
     }
   } else {
     overflowStartTime = null;
+    // Desbloquear drops si el overflow se resolvió
+    overflowLocked = false;
   }
 }
 
@@ -1260,7 +1278,7 @@ function drawEvolutionWheel() {
   ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
   ctx.stroke();
 
-  // Las 9 comidas en el anillo
+  // Las 11 comidas en el anillo
   const midR = (outerR + innerR) / 2;
   const ringHalfThickness = (outerR - innerR) / 2;
 
@@ -1268,7 +1286,7 @@ function drawEvolutionWheel() {
     const angle = (i / MAX_LEVEL) * Math.PI * 2 - Math.PI / 2;
     const fx = cx + Math.cos(angle) * midR;
     const fy = cy + Math.sin(angle) * midR;
-    const miniR = Math.round(ringHalfThickness * (0.50 + (i / (MAX_LEVEL - 1)) * 0.32));
+    const miniR = Math.round(ringHalfThickness * (0.42 + (i / (MAX_LEVEL - 1)) * 0.28));
 
     const img = foodImages[i];
     if (isImgReady(img)) {
