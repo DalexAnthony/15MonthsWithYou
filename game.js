@@ -502,8 +502,10 @@ function processFusions() {
         const dy = a.position.y - b.position.y;
         const dist = Math.hypot(dx, dy);
 
-        // Tolerancia de 10px para asegurar que cualquier pareja que se toque o estÃ© pegada se fusione
-        if (dist <= radiusA + radiusB + 10) {
+        // Tolerancia aumentada y verificación por bounds para cubrir casos de contacto visual
+        const TOLERANCE = 18;
+        const boundsOverlap = a.bounds && b.bounds && !(a.bounds.max.x < b.bounds.min.x || a.bounds.min.x > b.bounds.max.x || a.bounds.max.y < b.bounds.min.y || a.bounds.min.y > b.bounds.max.y);
+        if (dist <= radiusA + radiusB + TOLERANCE || boundsOverlap) {
           tryRegisterFusion(a, b);
         }
       }
@@ -541,6 +543,11 @@ function processFusions() {
     shakeAmount = Math.min(shakeAmount + 3, 10);
   }
   pendingFusions = [];
+
+  // Asegurar que cualquier flag _fused quedado en cuerpos que no fueron removidos se restablezca
+  for (const body of foodBodies) {
+    if (body && body._fused) body._fused = false;
+  }
 }
 
 
@@ -1593,26 +1600,6 @@ function drawGameOverOverlay() {
 // ============================================================
 function drawCelebrationOverlay() {
   ctx.save();
-
-  const minX = -offsetX / scale;
-  const maxX = (canvas.width - offsetX) / scale;
-  const minY = -offsetY / scale;
-  const maxY = (canvas.height - offsetY) / scale;
-  ctx.fillStyle = 'rgba(20, 5, 20, 0.4)';
-  ctx.fillRect(minX, minY, maxX - minX, maxY - minY);
-
-  const cx = VIRTUAL_W / 2;
-  const cy = VIRTUAL_H / 2;
-
-  ctx.fillStyle = '#FFF';
-  ctx.shadowColor = 'rgba(255, 107, 157, 0.6)';
-  ctx.shadowBlur = 24;
-  ctx.font = `900 36px 'Fredoka', 'Sniglet', sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('CorazÃ³n formado', cx, cy);
-  ctx.shadowBlur = 0;
-
   ctx.restore();
 }
 
