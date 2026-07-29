@@ -328,6 +328,7 @@ let shakeAmount = 0;
 let heartAchieved = false;
 let dropCooldown = 0;
 let overflowStartTime = null;
+let overflowLocked = false;
 
 let showLoveLetterModal = false;
 let loveLetterShown = false;
@@ -418,7 +419,7 @@ function getHandPos(levelIndex = currentLevel) {
 // ============================================================
 function dropItem() {
   if (gameState !== 'playing') return;
-  if (dropCooldown > 0 || currentLevel === 0) return;
+  if (overflowLocked || dropCooldown > 0 || currentLevel === 0) return;
 
   const levelToDrop = currentLevel;
   const radius = FOOD_SIZES[levelToDrop - 1];
@@ -640,6 +641,7 @@ function checkGameOver() {
       break;
     }
   }
+
   if (isOverflowing) {
     if (!overflowStartTime) {
       overflowStartTime = now;
@@ -652,7 +654,9 @@ function checkGameOver() {
 }
 
 function triggerGameOver() {
+  if (gameState !== 'playing') return;
   gameState = 'gameover';
+  overflowLocked = true;
   playGameOverSound();
   if (score > highScore) {
     highScore = score;
@@ -1576,7 +1580,7 @@ function drawGameOverOverlay() {
   if (score >= highScore && score > 0) {
     ctx.fillStyle = '#FF6B9D';
     ctx.font = `bold 16px 'Fredoka', 'Sniglet', sans-serif`;
-    ctx.fillText('âœ¨ New Record! âœ¨', cx, cy + 5);
+    ctx.fillText('¨ New Record! ¨', cx, cy + 5);
   }
 
   // BotÃ³n "Play Again" (BorgoÃ±a a Morado)
@@ -2218,6 +2222,9 @@ function handlePointerAction(clientX, clientY) {
   if (showLoveLetterModal) {
     if (hitTest(vx, vy, loveLetterCloseBtnBounds)) {
       showLoveLetterModal = false;
+      if (gameState === 'playing' && currentLevel === 0) {
+        generateNextPair();
+      }
     }
     return;
   }
@@ -2334,6 +2341,9 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (showLoveLetterModal) {
       showLoveLetterModal = false;
+      if (gameState === 'playing' && currentLevel === 0) {
+        generateNextPair();
+      }
       return;
     }
     if (gameState === 'celebration') {
@@ -2382,7 +2392,12 @@ function gameLoop() {
         showLoveLetterModal = true;
         loveLetterShown = true;
       }
+      overflowStartTime = null;
+      dropCooldown = 0;
       gameState = 'playing';
+      if (currentLevel === 0) {
+        generateNextPair();
+      }
     }
   }
 
@@ -2401,6 +2416,7 @@ function startGame() {
   currentLevel = 0;
   nextLevel = 0;
   overflowStartTime = null;
+  overflowLocked = false;
   generateNextPair();
   characterX = (C_LEFT + C_RIGHT) / 2 - HAND_OFFSET_X;
   // Iniciar música de fondo (requiere interacción del usuario)
@@ -2426,6 +2442,7 @@ function resetGame() {
   loveLetterShown = false;
   dropCooldown = 0;
   overflowStartTime = null;
+  overflowLocked = false;
   // Save high score on reset if needed
   if (score > highScore) {
     highScore = score;
