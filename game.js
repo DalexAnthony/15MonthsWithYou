@@ -833,11 +833,6 @@ function drawFoodItem(body) {
     ctx.arc(0, 0, radius - 1, 0, Math.PI * 2);
     ctx.stroke();
 
-    ctx.fillStyle = '#5D4037';
-    ctx.font = `bold ${Math.min(radius * 0.35, 14)}px 'Fredoka', 'Sniglet', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(FOOD_NAMES[level - 1].substring(0, 6), 0, 1);
   }
 
   ctx.restore();
