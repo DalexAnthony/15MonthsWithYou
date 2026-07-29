@@ -530,11 +530,13 @@ function processFusions() {
     const pts = SCORE_TABLE[newLevel] || 0;
     score += pts;
 
-    // Al llegar al Nivel 9 (CorazÃ³n) uniendo 2 Helados (Nivel 8), se celebra
-    if (newLevel === MAX_LEVEL) {
+    // Al llegar al Nivel 9 (CorazÃ³n) uniendo 2 Helados (Nivel 8), se celebra solo una vez
+    if (newLevel === MAX_LEVEL && !heartAchieved) {
       playHeartSound();
       heartAchieved = true;
       triggerCelebration(mx, my);
+    } else if (newLevel === MAX_LEVEL) {
+      playHeartSound();
     } else {
       playFusionSound(newLevel);
     }
