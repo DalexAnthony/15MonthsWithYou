@@ -330,6 +330,7 @@ let dropCooldown = 0;
 let overflowStartTime = null;
 
 let showLoveLetterModal = false;
+let loveLetterShown = false;
 let loveLetterCloseBtnBounds = { x: 0, y: 0, w: 38, h: 38 };
 
 // LÃMITES INTERACTIVOS DE BOTONES (Espacio Virtual 1600x900)
@@ -530,13 +531,11 @@ function processFusions() {
     const pts = SCORE_TABLE[newLevel] || 0;
     score += pts;
 
-    // Al llegar al Nivel 9 (CorazÃ³n) uniendo 2 Helados (Nivel 8), se celebra solo una vez
-    if (newLevel === MAX_LEVEL && !heartAchieved) {
+    // Al llegar al Nivel 9 (CorazÃ³n) uniendo 2 Helados (Nivel 8)
+    if (newLevel === MAX_LEVEL) {
       playHeartSound();
       heartAchieved = true;
       triggerCelebration(mx, my);
-    } else if (newLevel === MAX_LEVEL) {
-      playHeartSound();
     } else {
       playFusionSound(newLevel);
     }
@@ -2384,7 +2383,10 @@ function gameLoop() {
         highScore = score;
         localStorage.setItem('suikaFoodHighScore', highScore.toString());
       }
-      showLoveLetterModal = true;
+      if (!loveLetterShown) {
+        showLoveLetterModal = true;
+        loveLetterShown = true;
+      }
       gameState = 'playing';
     }
   }
@@ -2400,6 +2402,7 @@ function startGame() {
   gameState = 'playing';
   score = 0;
   heartAchieved = false;
+  loveLetterShown = false;
   currentLevel = 0;
   nextLevel = 0;
   overflowStartTime = null;
@@ -2425,6 +2428,7 @@ function resetGame() {
   celebrationTimer = 0;
   shakeAmount = 0;
   heartAchieved = false;
+  loveLetterShown = false;
   dropCooldown = 0;
   overflowStartTime = null;
   // Save high score on reset if needed
