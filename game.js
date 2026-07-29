@@ -398,7 +398,7 @@ function getRandomFoodLevel() {
 }
 
 function generateNextPair() {
-  if (currentLevel === 0) {
+  if (nextLevel === 0) {
     currentLevel = getRandomFoodLevel();
     nextLevel = getRandomFoodLevel();
   } else {
