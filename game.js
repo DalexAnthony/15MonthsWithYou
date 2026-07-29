@@ -2435,8 +2435,6 @@ function resetGame() {
   currentLevel = 0;
   nextLevel = 0;
   characterX = (C_LEFT + C_RIGHT) / 2 - HAND_OFFSET_X;
-  // Pausar BGM al reiniciar
-  try { if (bgm) { bgm.pause(); bgm.currentTime = 0; } } catch (_) { }
 }
 
 // ============================================================
